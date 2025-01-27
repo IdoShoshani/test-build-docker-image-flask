@@ -1,0 +1,56 @@
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            maven-
+
+      - name: Build with Maven
+        run: mvn clean package
+
+      - name: Run unit tests
+        run: mvn test
+
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: java-app
+          path: target/*.jar  # ⬅ כאן הוא ימצא את ה-JAR שנוצר בלי קשר לגרסה שלו
+
+  docker-build:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download JAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: java-app
+          path: target
+
+      - name: Build Docker image
+        run: |
+          JAR_FILE=$(ls target/*.jar)  # ⬅ מציאת שם ה-JAR שנמצא בתיקיית target
+          docker build --build-arg JAR_FILE=$JAR_FILE -t java-docker-app .
+
+      - name: Run Docker container
+        run: |
+          docker run --rm java-docker-app
