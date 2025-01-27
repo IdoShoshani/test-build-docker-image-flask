@@ -5,7 +5,7 @@ FROM openjdk:11-jdk-slim
 WORKDIR /app
 
 # Copy the compiled JAR file
-COPY target/app.jar app.jar
+COPY target/*.jar app.jar
 
 # Run the application
 CMD ["java", "-jar", "app.jar"]

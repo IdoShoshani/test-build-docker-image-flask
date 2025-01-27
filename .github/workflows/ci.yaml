@@ -52,7 +52,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          JAR_FILE=$(ls target/*.jar)  # ⬅ מציאת שם ה-JAR שנמצא בתיקיית target
+          JAR_FILE=$(ls target/*.jar)
           docker build --build-arg JAR_FILE=$JAR_FILE -t java-docker-app .
 
       - name: Run Docker container
